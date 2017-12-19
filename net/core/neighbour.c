@@ -716,7 +716,7 @@ void neigh_destroy(struct neighbour *neigh)
 
 	if (!neigh->dead) {
 		printk(KERN_WARNING
-		       "Destroying alive neighbour %p\n", neigh);
+		       "Destroying alive neighbour %pK\n", neigh);
 		dump_stack();
 		return;
 	}
@@ -838,7 +838,7 @@ next_elt:
 	 * ARP entry timeouts range from 1/2 base_reachable_time to 3/2
 	 * base_reachable_time.
 	 */
-	queue_delayed_work(system_power_efficient_wq, &tbl->gc_work,
+	schedule_delayed_work(&tbl->gc_work,
 			      tbl->parms.base_reachable_time >> 1);
 	write_unlock_bh(&tbl->lock);
 }
@@ -1313,7 +1313,7 @@ int neigh_resolve_output(struct neighbour *neigh, struct sk_buff *skb)
 out:
 	return rc;
 discard:
-	NEIGH_PRINTK1("neigh_resolve_output: dst=%p neigh=%p\n",
+	NEIGH_PRINTK1("neigh_resolve_output: dst=%pK neigh=%pK\n",
 		      dst, neigh);
 out_kfree_skb:
 	rc = -EINVAL;
@@ -1535,8 +1535,7 @@ void neigh_table_init_no_netlink(struct neigh_table *tbl)
 
 	rwlock_init(&tbl->lock);
 	INIT_DELAYED_WORK_DEFERRABLE(&tbl->gc_work, neigh_periodic_work);
-	queue_delayed_work(system_power_efficient_wq, &tbl->gc_work,
-			tbl->parms.reachable_time);
+	schedule_delayed_work(&tbl->gc_work, tbl->parms.reachable_time);
 	setup_timer(&tbl->proxy_timer, neigh_proxy_process, (unsigned long)tbl);
 	skb_queue_head_init_class(&tbl->proxy_queue,
 			&neigh_table_proxy_queue_class);
