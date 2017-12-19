@@ -189,6 +189,17 @@ const struct cntry_locales_custom translate_custom_table[] = {
 	{"AW", "AW", 2},
 	{"AU", "AU", 6},
 	{"AT", "AT", 4},
+#if defined(BCM4354_CHIP) || defined(BCM43454_CHIP) || defined(BCM43455_CHIP)
+	{"AM", "AM", 1},
+	{"MY", "MY", 19},
+#if defined(BCM4354_CHIP)
+	{"DZ", "DZ", 2},
+#else
+	{"DZ", "GB", 6},
+#endif /* BCM4354_CHIP */
+#else
+	{"MY", "MY", 3},
+#endif /* BCM4354_CHIP || BCM43454_CHIP || BCM43455_CHIP */
 	{"AZ", "AZ", 2},
 	{"BS", "BS", 2},
 	{"BH", "BH", 4},

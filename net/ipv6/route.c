@@ -81,7 +81,8 @@ static void		ip6_rt_update_pmtu(struct dst_entry *dst, u32 mtu);
 #ifdef CONFIG_IPV6_ROUTE_INFO
 static struct rt6_info *rt6_add_route_info(struct net_device *dev,
 					   const struct in6_addr *prefix, int prefixlen,
-					   const struct in6_addr *gwaddr, unsigned pref);
+					   const struct in6_addr *gwaddr,
+					   unsigned pref);
 static struct rt6_info *rt6_get_route_info(struct net_device *dev,
 					   const struct in6_addr *prefix, int prefixlen,
 					   const struct in6_addr *gwaddr);
@@ -599,7 +600,6 @@ static struct rt6_info *rt6_select(struct fib6_node *fn, int oif, int strict)
 int rt6_route_rcv(struct net_device *dev, u8 *opt, int len,
 		  const struct in6_addr *gwaddr)
 {
-
 	struct route_info *rinfo = (struct route_info *) opt;
 	struct in6_addr prefix_buf, *prefix;
 	unsigned int pref;
@@ -640,12 +640,11 @@ int rt6_route_rcv(struct net_device *dev, u8 *opt, int len,
 				 rinfo->prefix_len);
 		prefix = &prefix_buf;
 	}
-
 	if (rinfo->prefix_len == 0)
 		rt = rt6_get_dflt_router(gwaddr, dev);
 	else
-		rt = rt6_get_route_info(net, prefix, rinfo->prefix_len,
-					gwaddr, dev->ifindex);
+		rt = rt6_get_route_info(dev, prefix, rinfo->prefix_len,
+				gwaddr);
 
 	if (rt && !lifetime) {
 		ip6_del_rt(rt);
@@ -960,8 +959,6 @@ struct dst_entry * ip6_route_output(struct net *net, const struct sock *sk,
 				    struct flowi6 *fl6)
 {
 	int flags = 0;
-	
-	fl6->flowi6_iif = LOOPBACK_IFINDEX;
 
 	if ((sk && sk->sk_bound_dev_if) || rt6_need_strict(&fl6->daddr))
 		flags |= RT6_LOOKUP_F_IFACE;
@@ -1943,7 +1940,8 @@ out:
 
 static struct rt6_info *rt6_add_route_info(struct net_device *dev,
 					   const struct in6_addr *prefix, int prefixlen,
-					   const struct in6_addr *gwaddr, unsigned pref)
+					   const struct in6_addr *gwaddr,
+					   unsigned pref)
 {
 	struct fib6_config cfg = {
 		.fc_table	= addrconf_rt_table(dev, RT6_TABLE_INFO),
@@ -1998,8 +1996,8 @@ struct rt6_info *rt6_add_dflt_router(const struct in6_addr *gwaddr,
 				     unsigned int pref)
 {
 	struct fib6_config cfg = {
-		.fc_table	= RT6_TABLE_DFLT,
 		.fc_table	= addrconf_rt_table(dev, RT6_TABLE_DFLT),
+		.fc_metric	= IP6_RT_PRIO_USER,
 		.fc_ifindex	= dev->ifindex,
 		.fc_flags	= RTF_GATEWAY | RTF_ADDRCONF | RTF_DEFAULT |
 				  RTF_UP | RTF_EXPIRES | RTF_PREF(pref),
@@ -2315,12 +2313,12 @@ void rt6_mtu_change(struct net_device *dev, unsigned mtu)
 }
 
 static const struct nla_policy rtm_ipv6_policy[RTA_MAX+1] = {
-	[RTA_GATEWAY]       = { .len = sizeof(struct in6_addr) },
-	[RTA_OIF]           = { .type = NLA_U32 },
-	[RTA_IIF]			= { .type = NLA_U32 },
+	[RTA_GATEWAY]		= { .len = sizeof(struct in6_addr) },
+	[RTA_OIF]		= { .type = NLA_U32 },
+	[RTA_IIF]		= { .type = NLA_U32 },
 	[RTA_PRIORITY]		= { .type = NLA_U32 },
-	[RTA_METRICS]       = { .type = NLA_NESTED },
-	[RTA_UID]			= { .type = NLA_U32 },
+	[RTA_METRICS]		= { .type = NLA_NESTED },
+	[RTA_UID]		= { .type = NLA_U32 },
 };
 
 static int rtm_to_fib6_config(struct sk_buff *skb, struct nlmsghdr *nlh,
