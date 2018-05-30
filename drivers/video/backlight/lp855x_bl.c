@@ -186,7 +186,7 @@ static int lp855x_bl_update_status(struct backlight_device *bl)
 		lp->pre_duty = 0;
 	}
 
-	dev_info(lp->dev, "%s : state = %x, brightness = %d, real_br = %d\n",
+	dev_dbg(lp->dev, "%s : state = %x, brightness = %d, real_br = %d\n",
 			__func__, bl->props.state, bl->props.brightness,
 			lp855x_brightness);
 

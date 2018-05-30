@@ -180,7 +180,6 @@ const struct cntry_locales_custom translate_custom_table[] = {
 	{"MH", "XZ", 11},	/* Universal if Country code is MARSHALL ISLANDS */
 	{"GL", "GP", 2},
 	{"AL", "AL", 2},
-	{"DZ", "GB", 6},
 	{"AS", "AS", 12},
 	{"AI", "AI", 1},
 	{"AF", "AD", 0},
@@ -252,7 +251,6 @@ const struct cntry_locales_custom translate_custom_table[] = {
 	{"MO", "SG", 0},
 	{"MK", "MK", 2},
 	{"MW", "MW", 1},
-	{"MY", "MY", 3},
 	{"MV", "MV", 3},
 	{"MT", "MT", 4},
 	{"MQ", "MQ", 2},

@@ -277,4 +277,5 @@ enum {
 };
 
 void charger_control_init(struct sec_battery_info *info);
+
 #endif /* __SEC_BATTERY_H */

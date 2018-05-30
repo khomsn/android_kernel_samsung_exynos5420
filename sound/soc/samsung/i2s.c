@@ -476,7 +476,7 @@ static int i2s_set_sysclk(struct snd_soc_dai *dai,
 		if (dir == SND_SOC_CLOCK_IN)
 			rfs = 0;
 
-		if ((rfs && other && other->rfs && (other->rfs != rfs)) ||
+		if ((rfs && other->rfs && (other->rfs != rfs)) ||
 				(any_active(i2s) &&
 				(((dir == SND_SOC_CLOCK_IN)
 					&& !(mod & MOD_CDCLKCON)) ||
@@ -554,7 +554,7 @@ static int i2s_set_fmt(struct snd_soc_dai *dai,
 	if (i2s == NULL) {
 		pr_err("######### %s: soc_dai_drvdata is NULL\n", __func__);
 	} else if (i2s->addr != i2s0_addr) {
-		pr_err("######### %s: i2s->addr = %p, i2s0_addr = %p\n",
+		pr_err("######### %s: i2s->addr = %pK, i2s0_addr = %pK\n",
 					__func__, i2s->addr, i2s0_addr);
 	}
 
@@ -1585,7 +1585,8 @@ static __devinit int samsung_i2s_probe(struct platform_device *pdev)
 
 	return 0;
 err:
-	release_mem_region(regs_base, resource_size(res));
+	if (res)
+		release_mem_region(regs_base, resource_size(res));
 
 	return ret;
 }

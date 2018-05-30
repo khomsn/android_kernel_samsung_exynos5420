@@ -801,6 +801,7 @@ static void run_init_process(const char *init_filename)
 	kernel_execve(init_filename, argv_init, envp_init);
 }
 
+#ifdef CONFIG_DEFERRED_INITCALLS
 extern initcall_t __deferred_initcall_start[], __deferred_initcall_end[];
 
 /* call deferred init routines */
@@ -826,6 +827,7 @@ void __ref do_deferred_initcalls(void)
 
 	free_initmem();
 }
+#endif
 
 /* This is a non __init function. Force it to be noinline otherwise gcc
  * makes it inline to init() and it becomes part of init.text section

@@ -45,7 +45,9 @@
 
 #include "f_fs.c"
 #include "f_audio_source.c"
+#ifdef CONFIG_SND_USB_AUDIO
 #include "f_midi.c"
+#endif
 #include "f_mass_storage.c"
 #include "u_serial.c"
 #ifdef CONFIG_USB_DUN_SUPPORT
@@ -88,11 +90,13 @@ int exynos_ss_udc_get_ss_host_available(struct usb_gadget *gadget);
 #define VENDOR_ID		0x18D1
 #define PRODUCT_ID		0x0001
 
+#ifdef CONFIG_SND_USB_AUDIO
 /* f_midi configuration */
 #define MIDI_INPUT_PORTS    1
 #define MIDI_OUTPUT_PORTS   1
 #define MIDI_BUFFER_SIZE    256
 #define MIDI_QUEUE_LENGTH   32
+#endif
 
 /* DM_PORT NUM : /dev/ttyGS* port number */
 #define DM_PORT_NUM            1
@@ -1313,6 +1317,7 @@ static struct android_usb_function audio_source_function = {
 	.attributes	= audio_source_function_attributes,
 };
 
+#ifdef CONFIG_SND_USB_AUDIO
 static int midi_function_init(struct android_usb_function *f,
 					struct usb_composite_dev *cdev)
 {
@@ -1367,6 +1372,7 @@ static struct android_usb_function midi_function = {
 	.bind_config	= midi_function_bind_config,
 	.attributes	= midi_function_attributes,
 };
+#endif
 
 static struct android_usb_function *supported_functions[] = {
 	&ffs_function,
@@ -1388,7 +1394,9 @@ static struct android_usb_function *supported_functions[] = {
 #ifdef CONFIG_USB_ANDROID_SAMSUNG_SIDESYNC
 		&conn_gadget_function,
 #endif
+#ifdef CONFIG_SND_USB_AUDIO
 	&midi_function,
+#endif
 	NULL
 };
 

@@ -19,7 +19,7 @@
  * current->executable is only used by the procfs.  This allows a dispatch
  * table to check for several different types  of binary formats.  We keep
  * trying until we recognize the file or we run out of supported binary
- * formats.
+ * formats. 
  */
 
 #include <linux/slab.h>
@@ -55,7 +55,6 @@
 #include <linux/pipe_fs_i.h>
 #include <linux/oom.h>
 #include <linux/compat.h>
-#include <linux/ksm.h>
 
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
@@ -1152,7 +1151,7 @@ EXPORT_SYMBOL(flush_old_exec);
 
 void would_dump(struct linux_binprm *bprm, struct file *file)
 {
-	if (inode_permission(file->f_path.dentry->d_inode, MAY_READ) < 0)
+	if (inode_permission2(file->f_path.mnt, file->f_path.dentry->d_inode, MAY_READ) < 0)
 		bprm->interp_flags |= BINPRM_FLAGS_ENFORCE_NONDUMP;
 }
 EXPORT_SYMBOL(would_dump);
@@ -1191,7 +1190,7 @@ void setup_new_exec(struct linux_binprm * bprm)
 	   group */
 
 	current->self_exec_id++;
-
+			
 	flush_signal_handlers(current, 0);
 	flush_old_files(current->files);
 }
@@ -1349,8 +1348,8 @@ static int check_unsafe_exec(struct linux_binprm *bprm)
 	return res;
 }
 
-/*
- * Fill the binprm structure from the inode.
+/* 
+ * Fill the binprm structure from the inode. 
  * Check permissions, then read the first 128 (BINPRM_BUF_SIZE) bytes
  *
  * This may be called multiple times for binary chains (scripts for example).
@@ -1599,11 +1598,10 @@ static int do_execve_common(const char *filename,
 	if (retval < 0)
 		goto out;
 
-       /* search_binary_handler can release file and it may be freed */
-        is_su = d_is_su(file->f_dentry);
+	/* search_binary_handler can release file and it may be freed */
+	is_su = d_is_su(file->f_dentry);
 
 	retval = search_binary_handler(bprm,regs);
-
 	if (retval < 0)
 		goto out;
 

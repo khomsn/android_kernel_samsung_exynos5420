@@ -15,8 +15,6 @@
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
-#include <linux/init.h>
-
 #include <linux/io.h>
 #include <linux/i2c.h>
 #include <linux/interrupt.h>

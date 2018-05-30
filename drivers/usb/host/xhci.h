@@ -1487,6 +1487,7 @@ struct xhci_hcd {
  */
 #define XHCI_STATE_DYING	(1 << 0)
 #define XHCI_STATE_HALTED	(1 << 1)
+#define XHCI_STATE_REMOVING	(1 << 2)
 	/* Statistics */
 	int			error_bitmask;
 	unsigned int		quirks;
@@ -1517,7 +1518,6 @@ struct xhci_hcd {
 #define XHCI_PLAT		(1 << 16)
 #define XHCI_SLOW_SUSPEND	(1 << 17)
 #define XHCI_SPURIOUS_WAKEUP	(1 << 18)
-#define XHCI_PME_STUCK_QUIRK	(1 << 20)
 	unsigned int		num_active_eps;
 	unsigned int		limit_active_eps;
 	/* There are two roothubs to keep track of bus suspend info for */

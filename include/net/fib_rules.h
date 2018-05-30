@@ -86,6 +86,7 @@ struct fib_rules_ops {
 	[FRA_UID_START]	= { .type = NLA_U32 }, \
 	[FRA_UID_END]	= { .type = NLA_U32 }
 
+
 static inline void fib_rule_get(struct fib_rule *rule)
 {
 	atomic_inc(&rule->refcnt);

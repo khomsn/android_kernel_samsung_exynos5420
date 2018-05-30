@@ -366,7 +366,7 @@ trip_point_temp_oneshot_store(struct device *dev, struct device_attribute *attr,
 	ret = tz->ops->set_trip_temp(tz, 2, temp2);
 	if (ret)
 		return ret;
-
+	
 	ret = tz->ops->set_trip_temp(tz, 3, temp3);
 	if (ret)
 		return ret;
@@ -401,7 +401,7 @@ trip_point_temp_oneshot_show(struct device *dev, struct device_attribute *attr,
 	ret = tz->ops->get_trip_temp(tz, 2, &trip_temp2);
 	if (ret)
 		return ret;
-
+	
 	ret = tz->ops->get_trip_temp(tz, 3, &trip_temp3);
 	if (ret)
 		return ret;

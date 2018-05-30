@@ -730,7 +730,7 @@ static void mxt_report_input_data(struct mxt_data *data)
 #if TSP_BOOSTER
 			booster_restart = true;
 #endif
-#endif /*CONFIG_SAMSUNG_PRODUCT_SHIP*/
+#endif
 		}
 		else if (data->fingers[i].state == MXT_STATE_RELEASE) {
 #if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
@@ -752,9 +752,8 @@ static void mxt_report_input_data(struct mxt_data *data)
 				0,0,0
 #endif /*TSP_USE_SHAPETOUCH*/
 			, data->fingers[i].mcount);
-#endif /*CONFIG_SAMSUNG_PRODUCT_SHIP*/
+#endif
 		}
-
 
 		if (data->fingers[i].state == MXT_STATE_RELEASE) {
 			data->fingers[i].state = MXT_STATE_INACTIVE;

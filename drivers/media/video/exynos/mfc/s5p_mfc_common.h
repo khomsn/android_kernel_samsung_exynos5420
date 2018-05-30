@@ -217,7 +217,6 @@ struct s5p_mfc_pm {
 	atomic_t	power;
 	struct device	*device;
 	spinlock_t	clklock;
-	int clock_on_steps;
 };
 
 struct s5p_mfc_fw {
@@ -707,6 +706,8 @@ struct s5p_mfc_dec {
 	struct mfc_user_shared_handle sh_handle;
 	
 	int dynamic_ref_filled;
+
+	unsigned int err_sync_flag;
 };
 
 struct s5p_mfc_enc {

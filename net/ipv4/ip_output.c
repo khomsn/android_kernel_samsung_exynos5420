@@ -207,7 +207,7 @@ static inline int ip_finish_output2(struct sk_buff *skb)
 	rcu_read_lock();
 	neigh = dst_get_neighbour_noref(dst);
 	if (neigh) {
-		int res = dst_neigh_output(dst, neigh, skb);
+		int res = neigh_output(neigh, skb);
 
 		rcu_read_unlock();
 		return res;

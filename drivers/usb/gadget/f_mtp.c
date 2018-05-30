@@ -704,6 +704,11 @@ static void send_file_work(struct work_struct *data)
 	offset = dev->xfer_file_offset;
 	count = dev->xfer_file_length;
 
+	if (count < 0) {
+		dev->xfer_result = -EINVAL;
+		return;
+	}
+
 	DBG(cdev, "send_file_work(%lld %lld)\n", offset, count);
 
 	if (dev->xfer_send_header) {
@@ -805,6 +810,11 @@ static void receive_file_work(struct work_struct *data)
 	offset = dev->xfer_file_offset;
 	count = dev->xfer_file_length;
 
+	if (count < 0) {
+		dev->xfer_result = -EINVAL;
+		return;
+	}
+
 	DBG(cdev, "receive_file_work(%lld)\n", count);
 
 	while (count > 0 || write_req) {
@@ -845,10 +855,6 @@ static void receive_file_work(struct work_struct *data)
 				r = -ECANCELED;
 				if (!dev->rx_done)
 					usb_ep_dequeue(dev->ep_out, read_req);
-				break;
-			}
-			if (read_req->status) {
-				r = read_req->status;
 				break;
 			}
 			/* if xfer_file_length is 0xFFFFFFFF, then we read until

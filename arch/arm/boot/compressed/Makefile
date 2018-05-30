@@ -128,7 +128,6 @@ endif
 ccflags-y := -fpic -fno-builtin -I$(obj)
 asflags-y :=
 
-
 # Supply kernel BSS size to the decompressor via a linker symbol.
 KBSS_SZ = $(shell $(CROSS_COMPILE)size $(obj)/../../../../vmlinux | \
 		awk 'END{print $$3}')

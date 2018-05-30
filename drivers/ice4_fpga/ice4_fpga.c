@@ -1070,7 +1070,6 @@ err_create_wq:
 #endif
 	return 0;
 }
-
 late_initcall(barcode_emul_init);
 
 static void __exit barcode_emul_exit(void)

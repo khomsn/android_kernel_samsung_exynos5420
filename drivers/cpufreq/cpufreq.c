@@ -434,6 +434,7 @@ static ssize_t show_cpuinfo_cur_freq(struct cpufreq_policy *policy,
 	return sprintf(buf, "%u\n", cur_freq);
 }
 
+
 /**
  * show_scaling_governor - show the current policy for the specified CPU
  */
@@ -448,6 +449,7 @@ static ssize_t show_scaling_governor(struct cpufreq_policy *policy, char *buf)
 				policy->governor->name);
 	return -EINVAL;
 }
+
 
 /**
  * store_scaling_governor - store policy for the specified CPU

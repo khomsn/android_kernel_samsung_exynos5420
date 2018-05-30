@@ -580,10 +580,11 @@ endif
 ifdef CONFIG_CC_STACKPROTECTOR_REGULAR
   stackp-flag := -fstack-protector
   ifeq ($(call cc-option, $(stackp-flag)),)
-    $(warning Cannot use CONFIG_CC_STACKPROTECTOR: \
-	      -fstack-protector not supported by compiler))
+    $(warning Cannot use CONFIG_CC_STACKPROTECTOR_REGULAR: \
+              -fstack-protector not supported by compiler)
   endif
-else ifdef CONFIG_CC_STACKPROTECTOR_STRONG
+else
+ifdef CONFIG_CC_STACKPROTECTOR_STRONG
   stackp-flag := -fstack-protector-strong
   ifeq ($(call cc-option, $(stackp-flag)),)
     $(warning Cannot use CONFIG_CC_STACKPROTECTOR_STRONG: \
@@ -592,6 +593,7 @@ else ifdef CONFIG_CC_STACKPROTECTOR_STRONG
 else
   # Force off for distro compilers that enable stack protector by default.
   stackp-flag := $(call cc-option, -fno-stack-protector)
+endif
 endif
 KBUILD_CFLAGS += $(stackp-flag)
 
@@ -666,6 +668,11 @@ KBUILD_ARFLAGS := $(call ar-option,D)
 # check for 'asm goto'
 ifeq ($(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-goto.sh $(CC)), y)
 	KBUILD_CFLAGS += -DCC_HAVE_ASM_GOTO
+endif
+
+#ICCC
+ifeq ($(CONFIG_TZ_ICCC),y)
+    KBUILD_CFLAGS += -Idrivers/gud/gud-exynos5420/MobiCoreKernelApi/include/
 endif
 
 #Enable the whole of the following block to enable LKM AUTH

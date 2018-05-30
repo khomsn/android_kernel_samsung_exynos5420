@@ -1180,7 +1180,7 @@ void exynos_ion_sync_dmabuf_for_device(struct device *dev,
 
 	mutex_lock(&buffer->lock);
 
-	pr_debug("%s: syncing for device %s, buffer: %p, size: %d\n",
+	pr_debug("%s: syncing for device %s, buffer: %pK, size: %d\n",
 			__func__, dev ? dev_name(dev) : "null", buffer, size);
 
 	if (ion_buffer_need_flush_all(buffer))
@@ -1222,7 +1222,7 @@ void exynos_ion_sync_vaddr_for_device(struct device *dev,
 #else
 	bool flush_all = size >= ION_FLUSH_ALL_HIGHLIMIT ? true : false;
 #endif
-	pr_debug("%s: syncing for device %s, vaddr: %p, size: %d, offset: %ld\n",
+	pr_debug("%s: syncing for device %s, vaddr: %pK, size: %d, offset: %ld\n",
 			__func__, dev ? dev_name(dev) : "null",
 			vaddr, size, offset);
 
@@ -1269,7 +1269,7 @@ void exynos_ion_sync_dmabuf_for_cpu(struct device *dev,
 
 	mutex_lock(&buffer->lock);
 
-	pr_debug("%s: syncing for cpu %s, buffer: %p, size: %d\n",
+	pr_debug("%s: syncing for cpu %s, buffer: %pK, size: %d\n",
 			__func__, dev ? dev_name(dev) : "null", buffer, size);
 
 	if (ion_buffer_need_flush_all(buffer))
@@ -1306,7 +1306,7 @@ void exynos_ion_sync_vaddr_for_cpu(struct device *dev,
 #endif
 	if (dir == DMA_TO_DEVICE)
 		return;
-	pr_debug("%s: syncing for cpu %s, vaddr: %p, size: %d, offset: %ld\n",
+	pr_debug("%s: syncing for cpu %s, vaddr: %pK, size: %d, offset: %ld\n",
 			__func__, dev ? dev_name(dev) : "null",
 			vaddr, size, offset);
 	if (flush_all)

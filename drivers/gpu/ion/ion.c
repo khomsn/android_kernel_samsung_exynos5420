@@ -15,7 +15,9 @@
  *
  */
 
+#include <linux/atomic.h>
 #include <linux/device.h>
+#include <linux/err.h>
 #include <linux/file.h>
 #include <linux/freezer.h>
 #include <linux/fs.h>
@@ -385,6 +387,15 @@ static int ion_handle_put(struct ion_handle *handle)
 	return kref_put(&handle->ref, ion_handle_destroy);
 }
 
+/* Must hold the client lock */
+static struct ion_handle* ion_handle_get_check_overflow(struct ion_handle *handle)
+{
+	if (atomic_read(&handle->ref.refcount) + 1 == 0)
+		return ERR_PTR(-EOVERFLOW);
+	ion_handle_get(handle);
+	return handle;
+}
+
 static struct ion_handle *ion_handle_lookup(struct ion_client *client,
 					    struct ion_buffer *buffer)
 {
@@ -697,7 +708,7 @@ static int ion_debug_client_show(struct seq_file *s, void *unused)
 	}
 
 	if (IS_ERR_OR_NULL(n)) {
-		pr_err("%s: invalid client %p\n", __func__, client);
+		pr_err("%s: invalid client %pK\n", __func__, client);
 		up_read(&g_idev->lock);
 		return -EINVAL;
 	}
@@ -950,7 +961,7 @@ static void ion_vm_open(struct vm_area_struct *vma)
 	mutex_lock(&buffer->lock);
 	list_add(&vma_list->list, &buffer->vmas);
 	mutex_unlock(&buffer->lock);
-	pr_debug("%s: adding %p\n", __func__, vma);
+	pr_debug("%s: adding %pK\n", __func__, vma);
 }
 
 static void ion_vm_close(struct vm_area_struct *vma)
@@ -965,7 +976,7 @@ static void ion_vm_close(struct vm_area_struct *vma)
 			continue;
 		list_del(&vma_list->list);
 		kfree(vma_list);
-		pr_debug("%s: deleting %p\n", __func__, vma);
+		pr_debug("%s: deleting %pK\n", __func__, vma);
 		break;
 	}
 	mutex_unlock(&buffer->lock);
@@ -1155,7 +1166,7 @@ struct ion_handle *ion_import_dma_buf(struct ion_client *client, int fd)
 	/* if a handle exists for this buffer just take a reference to it */
 	handle = ion_handle_lookup(client, buffer);
 	if (!IS_ERR_OR_NULL(handle)) {
-		ion_handle_get(handle);
+		handle = ion_handle_get_check_overflow(handle);
 		goto end;
 	}
 	handle = ion_handle_create(client, buffer);

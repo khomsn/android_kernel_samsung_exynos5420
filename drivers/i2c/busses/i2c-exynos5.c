@@ -12,7 +12,6 @@
 #include <linux/module.h>
 
 #include <linux/i2c.h>
-#include <linux/init.h>
 #include <linux/time.h>
 #include <linux/interrupt.h>
 #include <linux/delay.h>
@@ -346,7 +345,7 @@ static int exynos5_i2c_xfer_msg(struct exynos5_i2c *i2c,
 static int exynos5_i2c_xfer(struct i2c_adapter *adap,
 			struct i2c_msg *msgs, int num)
 {
-	struct exynos5_i2c *i2c = (struct exynos5_i2c *)adap->algo_data;
+	struct exynos5_i2c *i2c = adap->algo_data;
 	int retry, i;
 	int ret;
 	int stop = 0;

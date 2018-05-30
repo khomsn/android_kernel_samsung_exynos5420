@@ -4302,7 +4302,7 @@ static bool check_same_owner(struct task_struct *p)
 
 	rcu_read_lock();
 	pcred = __task_cred(p);
-	if (cred->user_ns == pcred->user_ns)
+	if (cred->user->user_ns == pcred->user->user_ns)
 		match = (cred->euid == pcred->euid ||
 			 cred->euid == pcred->uid);
 	else
@@ -5383,27 +5383,17 @@ void idle_task_exit(void)
 }
 
 /*
- * While a dead CPU has no uninterruptible tasks queued at this point,
- * it might still have a nonzero ->nr_uninterruptible counter, because
- * for performance reasons the counter is not stricly tracking tasks to
- * their home CPUs. So we just add the counter to another CPU's counter,
- * to keep the global sum constant after CPU-down:
+ * Since this CPU is going 'away' for a while, fold any nr_active delta
+ * we might have. Assumes we're called after migrate_tasks() so that the
+ * nr_active count is stable.
+ *
+ * Also see the comment "Global load-average calculations".
  */
-static void migrate_nr_uninterruptible(struct rq *rq_src)
+static void calc_load_migrate(struct rq *rq)
 {
-	struct rq *rq_dest = cpu_rq(cpumask_any(cpu_active_mask));
-
-	rq_dest->nr_uninterruptible += rq_src->nr_uninterruptible;
-	rq_src->nr_uninterruptible = 0;
-}
-
-/*
- * remove the tasks which were accounted by rq from calc_load_tasks.
- */
-static void calc_global_load_remove(struct rq *rq)
-{
-	atomic_long_sub(rq->calc_load_active, &calc_load_tasks);
-	rq->calc_load_active = 0;
+	long delta = calc_load_fold_active(rq);
+	if (delta)
+		atomic_long_add(delta, &calc_load_tasks);
 }
 
 /*
@@ -5702,9 +5692,10 @@ migration_call(struct notifier_block *nfb, unsigned long action, void *hcpu)
 		migrate_tasks(cpu);
 		BUG_ON(rq->nr_running != 1); /* the migration thread */
 		raw_spin_unlock_irqrestore(&rq->lock, flags);
+		break;
 
-		migrate_nr_uninterruptible(rq);
-		calc_global_load_remove(rq);
+	case CPU_DEAD:
+		calc_load_migrate(rq);
 		break;
 #endif
 	}
@@ -6126,6 +6117,7 @@ cpu_attach_domain(struct sched_domain *sd, struct root_domain *rd, int cpu)
 {
 	struct rq *rq = cpu_rq(cpu);
 	struct sched_domain *tmp;
+	unsigned long next_balance = rq->next_balance;
 
 	/* Remove the sched domains which do not contribute to scheduling. */
 	for (tmp = sd; tmp; ) {
@@ -6149,6 +6141,17 @@ cpu_attach_domain(struct sched_domain *sd, struct root_domain *rd, int cpu)
 		if (sd)
 			sd->child = NULL;
 	}
+
+	for (tmp = sd; tmp; ) {
+		unsigned long interval;
+
+		interval = msecs_to_jiffies(tmp->balance_interval);
+		if (time_after(next_balance, tmp->last_balance + interval))
+			next_balance = tmp->last_balance + interval;
+
+		tmp = tmp->parent;
+	}
+	rq->next_balance = next_balance;
 
 	sched_domain_debug(sd, cpu);
 
@@ -7156,9 +7159,6 @@ void __init sched_init_smp(void)
 	hotcpu_notifier(cpuset_cpu_active, CPU_PRI_CPUSET_ACTIVE);
 	hotcpu_notifier(cpuset_cpu_inactive, CPU_PRI_CPUSET_INACTIVE);
 
-	/* RT runtime code needs to handle some hotplug events */
-	hotcpu_notifier(update_runtime, 0);
-
 	init_hrtick();
 
 	/* Move init over to a non-isolated CPU */
@@ -8019,23 +8019,6 @@ static void cpu_cgroup_destroy(struct cgroup *cgrp)
 	sched_destroy_group(tg);
 }
 
-static int
-cpu_cgroup_allow_attach(struct cgroup *cgrp, struct cgroup_taskset *tset)
-{
-	const struct cred *cred = current_cred(), *tcred;
-	struct task_struct *task;
-
-	cgroup_taskset_for_each(task, cgrp, tset) {
-		tcred = __task_cred(task);
-
-		if ((current != task) && !capable(CAP_SYS_NICE) &&
-		    cred->euid != tcred->uid && cred->euid != tcred->suid)
-			return -EACCES;
-	}
-
-	return 0;
-}
-
 static int cpu_cgroup_can_attach(struct cgroup *cgrp,
 				 struct cgroup_taskset *tset)
 {
@@ -8427,7 +8410,7 @@ struct cgroup_subsys cpu_cgroup_subsys = {
 	.destroy	= cpu_cgroup_destroy,
 	.can_attach	= cpu_cgroup_can_attach,
 	.attach		= cpu_cgroup_attach,
-	.allow_attach	= cpu_cgroup_allow_attach,
+	.allow_attach	= subsys_cgroup_allow_attach,
 	.exit		= cpu_cgroup_exit,
 	.populate	= cpu_cgroup_populate,
 	.subsys_id	= cpu_cgroup_subsys_id,

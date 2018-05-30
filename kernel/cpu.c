@@ -400,6 +400,15 @@ int __cpuinit cpu_up(unsigned int cpu)
 	}
 
 	err = _cpu_up(cpu, 0);
+	if (!err) {
+		struct device *cpu_device;
+		cpu_device = get_cpu_device(cpu);
+		if (!cpu_device)
+			pr_err("%s: failed to get cpu%d device\n",
+				   __func__, cpu);
+		else
+			kobject_uevent(&cpu_device->kobj, KOBJ_ONLINE);
+	}
 
 out:
 	cpu_maps_update_done();

@@ -317,14 +317,14 @@ enum {
  * system_freezable_wq is equivalent to system_wq except that it's
  * freezable.
  *
- * system_nrt_freezable_wq is equivalent to system_nrt_wq except that
- * it's freezable.
- *
  * *_power_efficient_wq are inclined towards saving power and converted
  * into WQ_UNBOUND variants if 'wq_power_efficient' is enabled; otherwise,
  * they are same as their non-power-efficient counterparts - e.g.
  * system_power_efficient_wq is identical to system_wq if
  * 'wq_power_efficient' is disabled.  See WQ_POWER_EFFICIENT for more info.
+ *
+ * system_nrt_freezable_wq is equivalent to system_nrt_wq except that
+ * it's freezable.
  */
 extern struct workqueue_struct *system_wq;
 extern struct workqueue_struct *system_long_wq;
